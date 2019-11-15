@@ -1,12 +1,16 @@
 var express = require('express');
 var router = express.Router();
-var model = require('../models/index').users;
+var model = require('../models/index');
 
 router.get('/', async function (req, res, next) {
   try {
     res.json({
       error: false,
-      data: await model.findAll({})
+      data: await model.users.findAll({
+        order: [
+          ['id', 'DESC']
+        ]
+      })
     });
   } catch (err) {
     res.json({
@@ -20,7 +24,13 @@ router.get('/:id', async function (req, res, next) {
   try {
     res.json({
       error: false,
-      data: await model.findByPk(req.params.id)
+      data: await model.users.findByPk(req.params.id, {
+        include: [
+          {
+            model: model.todos
+          }
+        ]
+      })
     });
   } catch (err) {
     res.json({
@@ -40,7 +50,7 @@ router.post('/', async function (req, res, next) {
 
     res.json({
       error: false,
-      data: await model.create(body)
+      data: await model.users.create(body)
     });
   } catch (err) {
     res.json({
@@ -60,7 +70,7 @@ router.put('/:id', async function (req, res, next) {
 
     res.json({
       error: false,
-      data: await model.update(body, {
+      data: await model.users.update(body, {
         where: {
           id: req.params.id
         }
@@ -76,15 +86,13 @@ router.put('/:id', async function (req, res, next) {
 
 router.delete('/:id', async function (req, res, next) {
   try {
-    await model.destroy({
-      where: {
-        id: req.params.id
-      }
-    });
-
     res.json({
       error: false,
-      data: 1
+      data: await model.users.destroy({
+        where: {
+          id: req.params.id
+        }
+      })
     });
   } catch (err) {
     res.json({
