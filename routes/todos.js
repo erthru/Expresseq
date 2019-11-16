@@ -1,10 +1,15 @@
 var express = require('express');
 var router = express.Router();
 var model = require('../models/index');
+var sequelize = require('sequelize');
 
 // get todos
 router.get('/', async function (req, res, next) {
     try {
+        const page = req.query.page == null ? 1 : parseInt(req.query.page);
+        const limit = req.query.limit == null ? 10 : parseInt(req.query.limit);
+        const offset = (page - 1) * limit;
+
         const todos = await model.todos.findAll({
             include: [
                 {
@@ -13,13 +18,36 @@ router.get('/', async function (req, res, next) {
             ],
             order: [
                 ['id', 'DESC']
+            ],
+            limit: limit,
+            offset: offset
+        });
+
+        var countTodos = await model.todos.findAll({
+            include: [
+                {
+                    model: model.users
+                }
+            ],
+            attributes: [
+                [sequelize.fn('count', 'id'), '_total']
             ]
         });
-        
+
+        countTodos = countTodos[0].dataValues._total;
+
         res.json({
             error: false,
             data: {
-                todos: todos
+                todos: todos,
+                misc: {
+                    page: page,
+                    limit: limit,
+                    todos: {
+                        totalItems: countTodos,
+                        totalPages: Math.ceil(countTodos / limit)
+                    }
+                }
             }
         });
     } catch (err) {
