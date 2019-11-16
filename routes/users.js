@@ -18,13 +18,13 @@ router.get('/', async function (req, res, next) {
       offset: offset
     });
 
-    var countUsers = await model.users.findAll({
+    var countUsers = await model.users.findOne({
       attributes: [
         [sequelize.fn('count', 'id'), '_total']
       ]
     });
 
-    countUsers = countUsers[0].dataValues._total;
+    countUsers = countUsers.dataValues._total;
 
     res.json({
       error: false,

@@ -23,7 +23,7 @@ router.get('/', async function (req, res, next) {
             offset: offset
         });
 
-        var countTodos = await model.todos.findAll({
+        var countTodos = await model.todos.findOne({
             include: [
                 {
                     model: model.users
@@ -34,7 +34,7 @@ router.get('/', async function (req, res, next) {
             ]
         });
 
-        countTodos = countTodos[0].dataValues._total;
+        countTodos = countTodos.dataValues._total;
 
         res.json({
             error: false,
