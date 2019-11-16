@@ -2,20 +2,25 @@ var express = require('express');
 var router = express.Router();
 var model = require('../models/index');
 
+// get todos
 router.get('/', async function (req, res, next) {
     try {
+        const todos = await model.todos.findAll({
+            include: [
+                {
+                    model: model.users
+                }
+            ],
+            order: [
+                ['id', 'DESC']
+            ]
+        });
+        
         res.json({
             error: false,
-            data: await model.todos.findAll({
-                include: [
-                    {
-                        model: model.users
-                    }
-                ],
-                order: [
-                    ['id', 'DESC']
-                ]
-            })
+            data: {
+                todos: todos
+            }
         });
     } catch (err) {
         res.json({
@@ -25,17 +30,22 @@ router.get('/', async function (req, res, next) {
     }
 });
 
+// get todo
 router.get('/:id', async function (req, res, next) {
     try {
+        const todo = await model.todos.findByPk(req.params.id, {
+            include: [
+                {
+                    model: model.users
+                }
+            ]
+        });
+
         res.json({
             error: false,
-            data: await model.todos.findByPk(req.params.id, {
-                include: [
-                    {
-                        model: model.users
-                    }
-                ]
-            })
+            data: {
+                todo: todo
+            }
         });
     } catch (err) {
         res.json({
@@ -45,6 +55,7 @@ router.get('/:id', async function (req, res, next) {
     }
 });
 
+// create todo
 router.post('/', async function (req, res, next) {
     try {
         const body = {
@@ -53,9 +64,13 @@ router.post('/', async function (req, res, next) {
             userId: req.body.userid
         };
 
+        const todo = await model.todos.create(body);
+
         res.json({
             error: false,
-            data: await model.todos.create(body)
+            data: {
+                todo: todo
+            }
         });
     } catch (err) {
         res.json({
@@ -65,6 +80,7 @@ router.post('/', async function (req, res, next) {
     }
 });
 
+// update todo
 router.put('/:id', async function (req, res, next) {
     try {
         const body = {
@@ -73,13 +89,17 @@ router.put('/:id', async function (req, res, next) {
             userId: req.body.userid
         };
 
+        const updateStatus = await model.todos.update(body, {
+            where: {
+                id: req.params.id
+            }
+        });
+
         res.json({
             error: false,
-            data: await model.todos.update(body, {
-                where: {
-                    id: req.params.id
-                }
-            })
+            data: {
+                status: updateStatus
+            }
         });
     } catch (err) {
         res.json({
@@ -91,13 +111,17 @@ router.put('/:id', async function (req, res, next) {
 
 router.delete('/:id', async function (req, res, next) {
     try {
+        const deleteStatus = await model.todos.destroy({
+            where: {
+                id: req.params.id
+            }
+        });
+
         res.json({
             error: false,
-            data: await model.todos.destroy({
-                where: {
-                    id: req.params.id
-                }
-            })
+            data: {
+                status: deleteStatus
+            }
         });
     } catch (err) {
         res.json({

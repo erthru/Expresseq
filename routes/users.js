@@ -2,15 +2,20 @@ var express = require('express');
 var router = express.Router();
 var model = require('../models/index');
 
+// get users
 router.get('/', async function (req, res, next) {
   try {
+    const users = await model.users.findAll({
+      order: [
+        ['id', 'DESC']
+      ]
+    });
+
     res.json({
       error: false,
-      data: await model.users.findAll({
-        order: [
-          ['id', 'DESC']
-        ]
-      })
+      data: {
+        users: users
+      }
     });
   } catch (err) {
     res.json({
@@ -20,17 +25,22 @@ router.get('/', async function (req, res, next) {
   }
 });
 
+// get user
 router.get('/:id', async function (req, res, next) {
   try {
+    const user = await model.users.findByPk(req.params.id, {
+      include: [
+        {
+          model: model.todos
+        }
+      ]
+    });
+
     res.json({
       error: false,
-      data: await model.users.findByPk(req.params.id, {
-        include: [
-          {
-            model: model.todos
-          }
-        ]
-      })
+      data: {
+        user: user
+      }
     });
   } catch (err) {
     res.json({
@@ -40,6 +50,7 @@ router.get('/:id', async function (req, res, next) {
   }
 });
 
+// create user
 router.post('/', async function (req, res, next) {
   try {
     const body = {
@@ -48,9 +59,13 @@ router.post('/', async function (req, res, next) {
       phone: req.body.phone
     };
 
+    const user = await model.users.create(body);
+
     res.json({
       error: false,
-      data: await model.users.create(body)
+      data: {
+        user: user
+      }
     });
   } catch (err) {
     res.json({
@@ -60,6 +75,7 @@ router.post('/', async function (req, res, next) {
   }
 });
 
+// update user
 router.put('/:id', async function (req, res, next) {
   try {
     const body = {
@@ -68,13 +84,17 @@ router.put('/:id', async function (req, res, next) {
       phone: req.body.phone
     };
 
+    const updateStatus = await model.users.update(body, {
+      where: {
+        id: req.params.id
+      }
+    });
+
     res.json({
       error: false,
-      data: await model.users.update(body, {
-        where: {
-          id: req.params.id
-        }
-      })
+      data: {
+        status: updateStatus
+      }
     });
   } catch (err) {
     res.json({
@@ -86,13 +106,17 @@ router.put('/:id', async function (req, res, next) {
 
 router.delete('/:id', async function (req, res, next) {
   try {
+    const deleteStatus = await model.users.destroy({
+      where: {
+        id: req.params.id
+      }
+    });
+
     res.json({
       error: false,
-      data: await model.users.destroy({
-        where: {
-          id: req.params.id
-        }
-      })
+      data: {
+        status: deleteStatus
+      }
     });
   } catch (err) {
     res.json({
