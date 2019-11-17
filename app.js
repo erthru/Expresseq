@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var basicAuth = require('express-basic-auth');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -19,6 +20,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// auth before accessing the router
+app.use(basicAuth({
+  users: {'admin': 'supersecret'},
+  challenge: true
+}));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
